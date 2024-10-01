@@ -1,10 +1,35 @@
+// import pg from 'pg';
+// import fs from 'fs';
 import inquirer from 'inquirer'; 
-import pg from 'pg';
-import fs from 'fs';
-import {connection} from './connections.js';
-
+import { Pool } from 'pg';
 
 class EmployeeTracker {
+  connection: Pool;
+
+  constructor() {
+    this.connection = new Pool({
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      host: 'localhost',
+      database: process.env.DB_NAME,
+      port: 5432,
+    });
+  }
+
+  async connect(): Promise<void> {
+    try {
+      await this.connection.connect();
+      console.log('Connected to the database');
+    } catch (error) {
+      console.error('Error connecting to the database: ', error);
+    }
+  }
+
+  async disconnect() {
+    await this.connection.end();
+    console.log('Disconnected from the database');
+  }
+
   startEtm(): void {
     inquirer
       .prompt([
@@ -25,7 +50,7 @@ class EmployeeTracker {
         ],
         },
       ])
-      .then((answers) => {
+      .then((answers: { Option: string; }) => {
         // check if the user wants to create a new vehicle or select an existing vehicle
         if (answers.Option === 'View All Employees') {
           this.viewAllEmp();
@@ -47,9 +72,9 @@ class EmployeeTracker {
       });
   }
 
-  addEmp(answers: any): void {
-    inquirer
-      .prompt([
+  async addEmp(_answers: any): Promise<void> {
+    try {
+      const answers = await inquirer.prompt([
         {
           type: 'input',
           name: 'first_name',
@@ -68,9 +93,9 @@ class EmployeeTracker {
         {
           type: 'input',
           name: 'manager',
-          message: 'Who is the employee manager?',
-          },])
-      .then(async (answers: any): Promise<void> => {
+          message: 'Who is the employee manager (leave blank if none)?',
+          },
+        ]);
         const {first_name, last_name, role, manager} = answers;
         //check if role exists
         const roleExists = `SELECT id FROM roles WHERE title = $1`;
@@ -81,22 +106,23 @@ class EmployeeTracker {
           return;
         }
         //check if manager exists
-        const managerExists = `SELECT id FROM employees WHERE first_name = $1 AND last_name = $2`;
-        const managerNames = manager.split(' ');
-        const managerValues = await this.connection.query(managerExists, [managerNames[0], managerNames[1]]);
-        const manager_id = managerValues.rows.length > 0 ? managerValues.rows[0].id : null;
-        
-        const query = `INSERT INTO employees (first_name, last_name, role_id, manager_id) 
-          VALUES ($1, $2, (SELECT id FROM roles WHERE title = $3), (SELECT id FROM employees WHERE first_name = $4 AND last_name = $5))`;
+        let manager_id = null;
+        if (manager) {
+          const managerExists = `SELECT id FROM employees WHERE first_name = $1 AND last_name = $2`;
+          const managerNames = manager.split(' ');
+          const managerValues = await this.connection.query(managerExists, [managerNames[0], managerNames[1]]);
+          manager_id = managerValues.rows.length > 0 ? managerValues.rows[0].id : null;
+        }
+        const query = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
+          VALUES ($1, $2, (SELECT id FROM roles WHERE title = $3), $4)`;
         const values = [first_name, last_name, role, manager_id];
-        this.connection.query(query, values, (err, res) => {
-          if (err) { console.error(err); 
-            return; 
-          }
-          console.log('Employee added!');
-          this.startEtm();
-        });
-      });
+
+        await this.connection.query(query, values);
+        console.log('Employee added!');
+        this.startEtm();
+      } catch (error) {
+        console.error('Error adding employee: ', error);
+      }
   }
 
   updateEmpRole(): void {
@@ -117,7 +143,7 @@ class EmployeeTracker {
         const {employee, role} = answers;
         const query = `UPDATE employees SET role_id = (SELECT id FROM roles WHERE title = $1) WHERE first_name = $2`;
         const values = [role, employee];
-        this.connection.query(query, values, (err, res) => {
+        this.connection.query(query, values, (err: any, _res: any) => {
           if (err) { console.error(err); 
             return; 
           }
@@ -127,8 +153,9 @@ class EmployeeTracker {
       });
   }
 
-  getDeptNames(): string[] {
-    return this.departments.map((department) => department.name);
+  async getDeptNames(): Promise<string[]> {
+    const departments = await this.getDepartments();
+    return departments.map((department) => department.name);
   }
 
   addRole(): void {
@@ -156,7 +183,7 @@ class EmployeeTracker {
         const query = `INSERT INTO roles (title, salary, department_id) 
           VALUES ($1, $2, (SELECT id FROM departments WHERE name = $3))`;
         const values = [title, salary, department];
-        this.connection.query(query, values, (err, res) => {
+        this.connection.query(query, values, (err: any, _res: any) => {
           if (err) { console.error(err); 
             return; 
           }
@@ -175,11 +202,11 @@ class EmployeeTracker {
           message: 'What is the name of the department?'
         },            
       ])
-      .then((answers) => {
+      .then((answers: { name: any; }) => {
         const {name} = answers;
         const query = `INSERT INTO departments (name) VALUES ($1)`;
         const values = [name];
-        this.connection.query(query, values, (err, res) => {
+        this.connection.query(query, values, (err: any, _res: any) => {
           if (err) { console.error(err); 
             return; 
           }
@@ -197,7 +224,7 @@ class EmployeeTracker {
   }
 
   getEmployees(): void {
-    this.connection.query('SELECT * FROM employees', (err, res) => {
+    this.connection.query('SELECT * FROM employees', (err: any, res: any) => {
       if (err) throw err;
       console.table(res);
       this.startEtm();
@@ -209,7 +236,7 @@ class EmployeeTracker {
   }
 
   getRoles(): void {
-    this.connection.query('SELECT * FROM roles', (err, res) => {
+    this.connection.query('SELECT * FROM roles', (err: any, res: any) => {
       if (err) throw err;
       console.table(res);
       this.startEtm();
@@ -219,16 +246,27 @@ class EmployeeTracker {
   viewAllDept(): void {
     this.getDepartments();
   }
-
-  getDepartments(): void {
-    this.connection.query('SELECT * FROM departments', (err, res) => {
-      if (err) throw err;
-      console.table(res);
-      this.startEtm();
+  async getDepartments(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.connection.query('SELECT * FROM departments', (err: any, res: { rows: any[] | PromiseLike<any[]>; }) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(res.rows);
+        }
+      });
     });
-  }
-
+  } 
+  
   exit(): void {
     this.connection.end();
   }
-}
+
+  }
+  
+  const tracker = new EmployeeTracker();
+  tracker.connect().then(() => {
+    tracker.startEtm();
+  });
+
+export default EmployeeTracker;

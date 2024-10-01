@@ -1,51 +1,51 @@
-INSERT INTO departments (id, name)
+INSERT INTO department (id, name)
     VALUES
-        (1, 'Engineering'),
-        (2, 'Finance'),
-        (3, 'Legal'),
-        (4, 'Sales');
-        (5, 'Marketing');
-        (6, 'Human Resources');
-        (7, 'Research and Development');
+        (01, 'Engineering'),
+        (02, 'Finance'),
+        (03, 'Legal'),
+        (04, 'Sales'),
+        (05, 'Marketing'),
+        (06, 'Human Resources'),
+        (07, 'Research and Development');
        
-INSERT INTO roles (id, title, salary, department_id)
+INSERT INTO role (id, title, salary, department_id)
     VALUES
-        (1, 'Lead Engineer', 120000, 1),
-        (2, 'Engineer', 100000, 1),
-        (3, 'Accountant', 80000, 2),
-        (4, 'Financial Analyst', 90000, 2),
-        (5, 'Controller', 120000, 2),
-        (6, 'Legal Team Lead', 'Legal', 270000, 3),
-        (7, 'Attorney', 'Legal', 190000, 3),
-        (8, 'Sales Lead', 'Sales', 120000, 4),
-        (9, 'Salesperson', 'Sales', 80000, 4),
-        (10, 'Marketing Manager', 'Marketing', 90000, 5),
-        (11, 'Marketing Specialist', 'Marketing', 80000, 5),
-        (12, 'HR Director', 'Human Resources', 120000, 6),
-        (13, 'HR Specialist', 'Human Resources', 80000, 6),
-        (14, 'Research Director', 'Research and Development', 150000, 7),
-        (15, 'Research Analyst', 'Research and Development', 90000, 7);
+        (1, 'Lead Engineer', 120000, 01),
+        (2, 'Engineer', 100000, 01),
+        (3, 'Accountant', 80000, 02),
+        (4, 'Financial Analyst', 90000, 02),
+        (5, 'Controller', 120000, 02),
+        (6, 'Lawyer', 170000, 03),
+        (7, 'Cheif Attorney', 210000, 03),
+        (8, 'Sales Lead',  120000, 04),
+        (9, 'Salesperson', 80000, 04),
+        (10, 'Marketing Manager', 90000, 05),
+        (11, 'Marketing Specialist', 80000, 05),
+        (12, 'HR Director', 120000, 06),
+        (13, 'HR Specialist', 80000, 06),
+        (14, 'Research Director', 150000, 07),
+        (15, 'Research Analyst', 90000, 07);
         
 
-INSERT INTO employees (id, first_name, last_name, role_id, manager_id)
+INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
     VALUES 
-        (1, 'John', 'Doe', 1, NULL),
-        (2, 'Mike', 'Chan', 2, 1),
-        (3, 'Ashley', 'Rodriguez', 2, 1),
-        (4, 'Kevin', 'Tupik', 2, 1),
-        (5, 'Kunal', 'Singh', 2, 1),
-        (6, 'Malia', 'Brown', 2, 1),
-        (7, 'Sarah', 'Lourd', 3, 9),
-        (8, 'Tim', 'Allen', 4, 9),
-        (9, 'Tina', 'Munson', 5, NULL),
-        (10, 'Eric', 'Stevens', 6, NULL),
-        (11, 'Sam', 'Norton', 6, 10),
-        (12, 'Rick', 'Fish', 8, NULL),
-        (13, 'Sammy', 'Green', 9, 12),
-        (14, 'Tom', 'Hanks', 10, NULL),
-        (15, 'Katie', 'Perri', 11, 14),
-        (16, 'Brady', 'Pitts', 12, NULL),
-        (17, 'Angelina', 'Jolie', 13, 16),
-        (18, 'Gill', 'Bates', 14, NULL),
-        (19, 'Elon', 'Must',  15, 18);  
+        (201, 'John', 'Doe', 1, NULL),
+        (202, 'Mike', 'Chan', 2, 201),
+        (203, 'Ashley', 'Rodriguez', 2, 201),
+        (204, 'Kevin', 'Tupik', 2, 201),
+        (205, 'Kunal', 'Singh', 2, 201),
+        (206, 'Malia', 'Brown', 2, 201),
+        (207, 'Sarah', 'Lourd', 3, 209),
+        (208, 'Tim', 'Allen', 4, 209),
+        (209, 'Tina', 'Munson', 5, NULL),
+        (210, 'Eric', 'Stevens', 6, 210),
+        (211, 'Sam', 'Norton', 7, NULL),
+        (212, 'Rick', 'Fish', 8, NULL),
+        (213, 'Sammy', 'Green', 9, 212),
+        (214, 'Tom', 'Hanks', 10, NULL),
+        (215, 'Katie', 'Perri', 11, 214),
+        (216, 'Brady', 'Pitts', 12, NULL),
+        (217, 'Angelina', 'Jolie', 13, 216),
+        (218, 'Gill', 'Bates', 14, NULL),
+        (219, 'Elon', 'Must',  15, 218);  
     
