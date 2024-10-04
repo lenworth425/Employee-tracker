@@ -102,7 +102,7 @@ class EmployeeTracker {
           type: 'list',
           name: 'manager',
           message: 'Who is the employee manager?',
-          choices: await this.getEmployeeNames(),
+          choices: await this.getEmployeeNames(), 
           },
         ]);
         const {first_name, last_name, role, manager} = answers;
@@ -212,9 +212,10 @@ class EmployeeTracker {
         },
       ])
         const {title, department, salary} = answers;
-        const query = `INSERT INTO role (title, salary, department_id) 
-          VALUES ($1, $2, (SELECT id FROM department WHERE name = $3))`;
-        const values = [title, salary, department];
+        const id = await this.generateEmployeeId();
+        const query = `INSERT INTO role (id, title, salary, department_id) 
+          VALUES ($1, $2, $3, (SELECT id FROM department WHERE name = $4))`;
+        const values = [id, title, salary, department];
         this.connection.query(query, values, (err: any, _res: any) => {
           if (err) { console.error(err); 
             return; 
@@ -238,8 +239,9 @@ class EmployeeTracker {
         },            
       ])
         const {name} = answers;
-        const query = `INSERT INTO department (name) VALUES ($2)`;
-        const values = [name];
+        const id = await this.generateEmployeeId();
+        const query = `INSERT INTO department (id, name) VALUES ($1, $2)`;
+        const values = [id, name];
         this.connection.query(query, values, (err: any, _res: any) => {
           if (err) { console.error(err); 
             return; 
@@ -352,7 +354,8 @@ class EmployeeTracker {
   
   exit(): void {
     this.connection.end();
-    console.log('Goodbye!');
+    console.log('Database connection closed. Goodbye!');
+    process.exit(0);
   }
 
   }
