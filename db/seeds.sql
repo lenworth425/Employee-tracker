@@ -48,4 +48,5 @@ INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
         (217, 'Angelina', 'Jolie', 13, 216),
         (218, 'Gill', 'Bates', 14, NULL),
         (219, 'Elon', 'Must',  15, 218);  
-    
+
+
